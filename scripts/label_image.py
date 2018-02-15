@@ -133,7 +133,7 @@ if __name__ == "__main__":
   top_k = results.argsort()[-5:][::-1]
   labels = load_labels(label_file)
 
-  print('\nEvaluation time (1-image): {:.3f}s\n'.format(end-start))
+  #print('\nEvaluation time (1-image): {:.3f}s\n'.format(end-start))
 
   for i in top_k:
     print(labels[i], results[i])
