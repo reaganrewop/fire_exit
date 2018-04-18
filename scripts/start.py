@@ -72,7 +72,7 @@ def load_labels(label_file):
 
       
 # Global Variables
-def conf():  
+def conf():
       file_name = "frame.png"
       model_file = "tf/retrained_graph.pb"
       label_file = "tf/retrained_labels.txt"
@@ -150,10 +150,11 @@ def conf():
 if __name__ == "__main__":
   i=0
   firebase_initialize()
-  cap = cv2.VideoCapture('rtmp://192.168.43.49:1935/flash/11:admin:admin1')
+  #cap = cv2.VideoCapture('rtmp://10.5.81.194:1935/flash/11:admin:admin1')
+  cap = cv2.VideoCapture(0)
   flag = False
   while(True):
-    cap = cv2.VideoCapture('rtmp://192.168.43.49:1935/flash/11:admin:admin1')
+    cap = cv2.VideoCapture(0)
     ret, frame = cap.read()
     if ret==True:
         cv2.imshow('frame',frame)
@@ -165,12 +166,15 @@ if __name__ == "__main__":
             if (flag == False):
                 flag = True
                 start = t()
-            elif((flag==True) & ((t()-start) >= 30)):
+            elif((flag==True) & ((t()-start) >= 30)): 
                 print('Blocked!')
-                db.reference().child('users').child('status').set('not blocked')
+                db.reference().child('exit1').child('status').set('blocked')
                 print('DB updated')
                 flag = False
         else:
+            if((t()-start) >= 30):
+                db.reference().child('exit1').child('status').set('Not blocked')
+                print('DB updated')
             flag = False
         cap.release()
         if cv2.waitKey(1) & 0xFF == ord('q'):
