@@ -15,7 +15,26 @@ import tensorflow as tf
 import time
 
 
-      
+import hashlib
+import json
+from urllib.parse import urlparse
+from uuid import uuid4
+from pymongo import MongoClient
+import urllib.request,json
+from bson import json_util
+from flask_cors import CORS
+
+
+def init_db(result):
+    client = MongoClient("mongodb://127.168.0.1:9000/")
+    db = client['firexitdb']
+    collection = db['exit1']
+    serverstatus = db.command("serverStatus")
+    if (result=="blocked"):
+        db.exit1.replace_one({"status":"unblocked"},{"status":"blocked"})
+    else:
+        db.exit1.replace_one({"status":"blocked"},{"status":"unblocked"})
+    
 def firebase_initialize():
     cred = credentials.Certificate("auth.json")
     firebase_admin.initialize_app(cred, {
@@ -150,11 +169,12 @@ def conf():
 if __name__ == "__main__":
   i=0
   firebase_initialize()
-  #cap = cv2.VideoCapture('rtmp://10.5.81.194:1935/flash/11:admin:admin1')
-  cap = cv2.VideoCapture(0)
+  cap = cv2.VideoCapture('rtmp://10.5.81.194:1935/flash/11:admin:admin1')
+  #cap = cv2.VideoCapture(0)
   flag = False
   while(True):
-    cap = cv2.VideoCapture(0)
+    #cap = cv2.VideoCapture(0)
+    cap = cv2.VideoCapture('rtmp://10.5.81.194:1935/flash/11:admin:admin1')
     ret, frame = cap.read()
     if ret==True:
         cv2.imshow('frame',frame)
@@ -168,12 +188,14 @@ if __name__ == "__main__":
                 start = t()
             elif((flag==True) & ((t()-start) >= 30)): 
                 print('Blocked!')
-                db.reference().child('exit1').child('status').set('blocked')
+                #db.reference().child('exit1').child('status').set('blocked')
+                init_db("blocked")
                 print('DB updated')
                 flag = False
         else:
             if((t()-start) >= 30):
-                db.reference().child('exit1').child('status').set('Not blocked')
+                #db.reference().child('exit1').child('status').set('Not blocked')
+                init_db("unblocked")
                 print('DB updated')
             flag = False
         cap.release()
